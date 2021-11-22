@@ -143,10 +143,16 @@ spec:
             - mountPath: {{ .Values.controller.jenkinsHome }}/init.groovy.d
               name: init-scripts
             {{- end }}
+        {{- if .Values.controller.initContainerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.controller.initContainerSecurityContext "enabled" | toYaml | nindent 12 }}
+        {{- end }}
       containers:
         - name: jenkins
           image: "{{ .Values.controller.image }}:{{- include "controller.tag" . -}}"
           imagePullPolicy: "{{ .Values.controller.imagePullPolicy }}"
+        {{- if .Values.controller.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.controller.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+        {{- end }}
           {{- if .Values.controller.overrideArgs }}
           args: [
             {{- range $overrideArg := .Values.controller.overrideArgs }}
@@ -280,6 +286,9 @@ spec:
         - name: config-reload
           image: "{{ .Values.controller.sidecars.configAutoReload.image }}"
           imagePullPolicy: {{ .Values.controller.sidecars.configAutoReload.imagePullPolicy }}
+        {{- if .Values.controller.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.controller.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+        {{- end }}
           env:
             - name: POD_NAME
               valueFrom:
